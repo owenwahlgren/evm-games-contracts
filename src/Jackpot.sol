@@ -72,7 +72,7 @@ contract Jackpot is VRFConsumerBaseV2 {
     function deposit() public payable {
         require(msg.value <= DEPOSIT_LIMIT && msg.value >= DEPOSIT_STEP, "Deposit is less or more than the deposit restrictions");
         GAME memory game = history[currGameId];
-        if (game.active) {require(block.timestamp < game.timeEnd, "Timer expired, waiting for spin to be called");}
+        if (game.active) {require(uint32(block.timestamp) < game.timeEnd, "Timer expired, waiting for spin to be called");}
         else {game.active = true; game.timeBegin = uint32(block.timestamp); game.timeEnd = uint32(block.timestamp) + JACKPOT_TIMER;}
 
         game.amount += uint96(msg.value);
@@ -92,7 +92,7 @@ contract Jackpot is VRFConsumerBaseV2 {
     */
     function spin() public {
         GAME memory game = history[currGameId];
-        require(game.active == true && block.timestamp >= game.timeEnd, "Timer not expired");
+        require(game.active == true && uint32(block.timestamp) >= game.timeEnd, "Timer not expired");
         LINKTOKEN.transferAndCall(address(COORDINATOR), chainlink_fee, abi.encode(s_subscriptionId));
         COORDINATOR.requestRandomWords(
             keyHash,
