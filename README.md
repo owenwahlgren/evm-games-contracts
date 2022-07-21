@@ -1,6 +1,7 @@
 # EVM.GAMES || EVM.GG SMART CONTRACTS
 This repository contains the Solidity contracts for [evm-games](https://github.com/owenwahlgren/evm-games).
-Written and tested within the [Foundry](https://github.com/gakonst/foundry) framework
+It is built upon Patrick Collins's [foundry-starter-kit](https://github.com/smartcontractkit/foundry-starter-kit), which contains the required dependencies for building with Chainlink services.
+Written and tested within the [Foundry](https://github.com/gakonst/foundry) framework.
 
 - [Requirements](#requirements)
 - [Quickstart](#quickstart)
