@@ -12,8 +12,8 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 contract Jackpot is VRFConsumerBaseV2 {
 
     /* 
-    @dev Chainlink settings
-    @notice see https://docs.chain.link/docs/vrf-contracts/#configurations 
+        @dev Chainlink settings
+        @notice see https://docs.chain.link/docs/vrf-contracts/#configurations 
     */
     VRFCoordinatorV2Interface COORDINATOR;
     LinkTokenInterface LINKTOKEN;
@@ -25,14 +25,14 @@ contract Jackpot is VRFConsumerBaseV2 {
     uint16 constant requestConfirmations = 3;
     uint32 constant numWords =  1;
     uint256 constant chainlink_fee = 0.25 ether; //.25 link fee for oracle
-    /*
 
-    @dev Initalize contract with Chainlink VRF subscription information
-    @param
-        * uint64 subscriptionId => Chainlink subscription id
-        * address vrf => Address of the Chainlink VRF coordinator
-        * bytes32 keyhash =>  Gaslane configuration
-    @notice see https://vrf.chain.link/
+    /*
+        @dev Initalize contract with Chainlink VRF subscription information
+        @param
+            * uint64 subscriptionId => Chainlink subscription id
+            * address vrf => Address of the Chainlink VRF coordinator
+            * bytes32 keyhash =>  Gaslane configuration
+        @notice see https://vrf.chain.link/
     */
     constructor(uint64 subscriptionId, address vrf, bytes32 keyhash) VRFConsumerBaseV2(vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
@@ -63,11 +63,11 @@ contract Jackpot is VRFConsumerBaseV2 {
     address payable[] public jackpotTickets;
 
     /*
-    @dev Deposit to the jackpot
-        * Require msg.value is within deposit restrictions (DEPOSIT_STEP <= msg.value <= DEPOSIT LIMIT)
-        * Require game is active and block.timestamp is before game expiry
-        * Start countdown of a new game if one doesn't exist
-        * Allocate tickets for msg.sender in steps of DEPOSIT_STEP in equivelance to msg.value (ie 1 eth == 100 tickets)
+        @dev Deposit to the jackpot
+            * Require msg.value is within deposit restrictions (DEPOSIT_STEP <= msg.value <= DEPOSIT LIMIT)
+            * Require game is active and block.timestamp is before game expiry
+            * Start countdown of a new game if one doesn't exist
+            * Allocate tickets for msg.sender in steps of DEPOSIT_STEP in equivelance to msg.value (ie 1 eth == 100 tickets)
     */
     function deposit() public payable {
         require(msg.value <= DEPOSIT_LIMIT && msg.value >= DEPOSIT_STEP, "Deposit is less or more than the deposit restrictions");
@@ -83,12 +83,12 @@ contract Jackpot is VRFConsumerBaseV2 {
     }
 
     /*
-    @dev Initiate Chainlink VRF Request
-        * Require the game exists and the timer has expired
-        * Give caller SPIN_REWARD % of the pot to promote autonomous function calls
-        * Request random number from COORDINATOR 
-        TODO: Decide if call will be funded by the contract, user, or subscription service
-        TODO: Reward spin caller?
+        @dev Initiate Chainlink VRF Request
+            * Require the game exists and the timer has expired
+            * Give caller SPIN_REWARD % of the pot to promote autonomous function calls
+            * Request random number from COORDINATOR 
+            TODO: Decide if call will be funded by the contract, user, or subscription service
+            TODO: Reward spin caller?
     */
     function spin() public {
         GAME memory game = history[currGameId];
@@ -104,13 +104,13 @@ contract Jackpot is VRFConsumerBaseV2 {
     }
 
     /* 
-    @dev Chainlink VRF Callback 
-        * Retrieves a random number and picks a winning ticket
-        * Sends the winnings
-        * Closes game and resets jackpot 
-    @param
-        * [UNUSED] uint256 (requestId) => The requestId made from COORDINATOR.requestRandomWords() 
-        * uint256[] memory randomWords => A list of random ints
+        @dev Chainlink VRF Callback 
+            * Retrieves a random number and picks a winning ticket
+            * Sends the winnings
+            * Closes game and resets jackpot 
+        @param
+            * [UNUSED] uint256 (requestId) => The requestId made from COORDINATOR.requestRandomWords() 
+            * uint256[] memory randomWords => A list of random ints
     */
     function fulfillRandomWords(
         uint256,
