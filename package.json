@@ -1,8 +1,8 @@
 {
-  "name": "foundry-starter-kit",
+  "name": "evm-games-contracts",
   "version": "1.0.0",
-  "description": "Minimal Template for Foundry Projects",
-  "author": "Patrick Collins",
+  "description": "smart contracts for evm.gg",
+  "author": "Owen Wahlgren",
   "license": "MIT",
   "files": [
     "src/**/*.sol"
@@ -13,10 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smartcontractkit/foundry-starter-kit.git"
-  },
-  "bugs": {
-    "url": "https://github.com/smartcontractkit/foundry-starter-kit/issues"
+    "url": "git+https://github.com/owenwahlgren/evm-games-contracts.git"
   },
   "scripts": {
     "setup": "make clean && make build",
