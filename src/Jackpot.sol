@@ -20,7 +20,7 @@ contract Jackpot is VRFConsumerBaseV2 {
     uint64 immutable s_subscriptionId;
     bytes32 constant keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
     address constant vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab; // rinkeby
-    address public constant link_token_contract = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+    address constant link_token_contract = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
     uint32 constant callbackGasLimit = 100000;
     uint16 constant requestConfirmations = 3;
     uint32 constant numWords =  1;
@@ -38,7 +38,6 @@ contract Jackpot is VRFConsumerBaseV2 {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         LINKTOKEN = LinkTokenInterface(link_token_contract);
         s_subscriptionId = subscriptionId;
-
     }
 
     /* 
@@ -55,9 +54,9 @@ contract Jackpot is VRFConsumerBaseV2 {
     }
     mapping(uint256 => GAME) public history;
     mapping(uint256 => bool) public vrfRequested;
+    uint32 constant public JACKPOT_TIMER = 2 minutes;
     uint256 constant public DEPOSIT_STEP = 0.01 ether;
     uint256 constant public DEPOSIT_LIMIT = 1 ether;
-    uint32 constant public JACKPOT_TIMER = 2 minutes;
     uint256 public currGameId;
     uint256 public jackpotTotalTickets;
     address payable[] public jackpotTickets;
@@ -76,7 +75,7 @@ contract Jackpot is VRFConsumerBaseV2 {
         else {game.active = true; game.timeBegin = uint32(block.timestamp); game.timeEnd = uint32(block.timestamp) + JACKPOT_TIMER;}
 
         uint ticketsAllocated = msg.value / DEPOSIT_STEP;
-        for(uint i = 0; i < ticketsAllocated; i++) {
+        for(uint i = 1; i <= ticketsAllocated; i++) {
             jackpotTickets[jackpotTotalTickets + i] = payable(msg.sender);
         }
         jackpotTotalTickets += ticketsAllocated;
