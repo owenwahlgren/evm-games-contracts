@@ -85,7 +85,7 @@ contract Jackpot is VRFConsumerBaseV2 {
         require(msg.value <= DEPOSIT_LIMIT && msg.value >= DEPOSIT_STEP, "Deposit violates restrictions restrictions");
         GAME memory game = history[currGameId];
         if (game.active) {require(uint32(block.timestamp) < game.timeEnd, "Timer expired, waiting for spin to be called");}
-        else {game.active = true; game.timeBegin = uint32(block.timestamp); game.timeEnd = uint32(block.timestamp) + JACKPOT_TIMER;}
+        else { game = GAME(address(0), 0, uint32(block.timestamp), uint32(block.timestamp) + JACKPOT_TIMER, true);}
 
         uint ticketsAllocated = msg.value / DEPOSIT_STEP;
         for(uint i = 1; i <= ticketsAllocated; i++) {
