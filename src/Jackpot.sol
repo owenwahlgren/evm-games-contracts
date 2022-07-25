@@ -71,6 +71,7 @@ contract Jackpot is VRFConsumerBaseV2 {
     uint256 constant public DEPOSIT_STEP = 0.01 ether;
     uint256 constant public DEPOSIT_LIMIT = 1 ether;
     uint256 public currGameId;
+    uint256 public totalTickets;
     address payable[] public jackpotTickets;
 
     /*
@@ -82,7 +83,7 @@ contract Jackpot is VRFConsumerBaseV2 {
     */
     function deposit() public payable {
         require(msg.value <= DEPOSIT_LIMIT && msg.value >= DEPOSIT_STEP, "Deposit violates restrictions restrictions");
-        GAME memory game = history[currGameId];
+        GAME storage game = history[currGameId];
         if (game.active) {require(uint32(block.timestamp) < game.timeEnd, "Timer expired, waiting for spin to be called");}
         else{ game.timeBegin = uint32(block.timestamp); game.timeEnd = uint32(block.timestamp) + JACKPOT_TIMER; game.active = true;}
 
@@ -90,6 +91,7 @@ contract Jackpot is VRFConsumerBaseV2 {
         for(uint i = 0; i < ticketsAllocated; i++) {
             jackpotTickets.push(payable(msg.sender));
         }
+        totalTickets += ticketsAllocated;
         game.amount += uint96(msg.value);
     }
 
@@ -138,11 +140,12 @@ contract Jackpot is VRFConsumerBaseV2 {
     ) internal override {
         uint256 winningTicket = (randomWords[0] % jackpotTickets.length); 
         address payable winner = jackpotTickets[winningTicket];
-        GAME memory game = history[currGameId];
+        GAME storage game = history[currGameId];
         game.active = false;
         game.winner = winner;
         winner.transfer(uint256(game.amount));
         currGameId += 1;
+        totalTickets = 0;
         delete jackpotTickets;
     }
 }
