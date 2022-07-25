@@ -3,6 +3,16 @@ import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
+
+interface IUniswapV2Router {
+    function getAmountsIn(uint amountOut, address[] memory path) external view returns (uint[] memory amounts);
+  
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    external
+    payable
+    returns (uint[] memory amounts);
+}
+
 /*
     @title EVM.GG JACKPOT
     @author owen.eth
@@ -11,6 +21,9 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 contract Jackpot is VRFConsumerBaseV2 {
 
+
+    address constant UNISWAP_ROUTER  = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
     /* 
         @dev Chainlink settings
         @notice see https://docs.chain.link/docs/vrf-contracts/#configurations 
@@ -18,9 +31,9 @@ contract Jackpot is VRFConsumerBaseV2 {
     VRFCoordinatorV2Interface COORDINATOR;
     LinkTokenInterface LINKTOKEN;
     uint64 immutable s_subscriptionId;
-    bytes32 constant keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
-    address constant vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab; // rinkeby
-    address constant link_token_contract = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+    bytes32 constant keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; //30 gwei key hash
+    address constant vrfCoordinator = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709; // rinkeby
+    address constant link_token_contract = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709; //rinkeby
     uint32 constant callbackGasLimit = 100000;
     uint16 constant requestConfirmations = 3;
     uint32 constant numWords =  1;
@@ -86,14 +99,22 @@ contract Jackpot is VRFConsumerBaseV2 {
         @dev Initiate Chainlink VRF Request
             * Require the game exists and the timer has expired
             * Give caller SPIN_REWARD % of the pot to promote autonomous function calls
+            * Convert portion of pot to LINK
             * Request random number from COORDINATOR 
-            TODO: Decide if call will be funded by the contract, user, or subscription service
             TODO: Reward spin caller?
     */
     function spin() public {
         GAME memory game = history[currGameId];
         require(!vrfRequested[currGameId] && uint32(block.timestamp) >= game.timeEnd, "Timer not expired");
         vrfRequested[currGameId] = true;
+
+        address[] memory path;
+        path[0] = WETH;
+        path[1] = link_token_contract;
+        uint[] memory amounts = IUniswapV2Router(UNISWAP_ROUTER).getAmountsIn(chainlink_fee, path);
+        IUniswapV2Router(UNISWAP_ROUTER).swapExactETHForTokens{value: amounts[0]}(chainlink_fee, path, address(this), block.timestamp + 15);
+        game.amount -= uint96(amounts[0]);
+
         LINKTOKEN.transferAndCall(address(COORDINATOR), chainlink_fee, abi.encode(s_subscriptionId));
         COORDINATOR.requestRandomWords(
             keyHash,
