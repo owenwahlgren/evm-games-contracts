@@ -18,4 +18,5 @@ contract DeployJackpot is Test {
     function testCanSpin() public {
         jackpot.spin();
     }
+
 }

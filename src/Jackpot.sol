@@ -104,11 +104,11 @@ contract Jackpot is VRFConsumerBaseV2 {
             TODO: Reward spin caller?
     */
     function spin() public {
-        GAME memory game = history[currGameId];
+        GAME storage game = history[currGameId];
         require(!vrfRequested[currGameId] && uint32(block.timestamp) >= game.timeEnd, "Timer not expired");
         vrfRequested[currGameId] = true;
 
-        address[] memory path;
+        address[] memory path = new address[](2);
         path[0] = WETH;
         path[1] = link_token_contract;
         uint[] memory amounts = IUniswapV2Router(UNISWAP_ROUTER).getAmountsIn(chainlink_fee, path);
